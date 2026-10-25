@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#111111">
+<title>חדשות עצמאיות</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root { --bar:#111; --fg:#eee; --accent:#ffb400; }
+  html,body { margin:0; height:100%; background:#fff; font-family:system-ui,sans-serif; }
+  #app { display:flex; flex-direction:column; height:100%; }
+  #views { flex:1; position:relative; }
+  .view { position:absolute; inset:0; display:none; flex-direction:column; }
+  .view.on { display:flex; }
+  iframe { flex:1; border:0; width:100%; }
+  .note { font-size:13px; padding:6px 10px; background:#f3f3f3; color:#333; display:flex; gap:14px; align-items:center; }
+  .note a, .note button { color:#00479e; background:none; border:0; font:inherit; text-decoration:underline; cursor:pointer; padding:0; }
+  dialog { max-width:480px; border:0; border-radius:8px; padding:16px; font-size:14px; line-height:1.5; }
+  dialog::backdrop { background:rgba(0,0,0,.5); }
+  nav { display:flex; background:var(--bar); padding-bottom:env(safe-area-inset-bottom); }
+  nav button { flex:1; padding:14px 4px; background:none; border:0; color:var(--fg); font-size:15px; border-top:3px solid transparent; }
+  nav button.on { border-top-color:var(--accent); color:var(--accent); font-weight:600; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="views"></div>
+  <nav id="tabs"></nav>
+</div>
+<dialog id="about">
+  <p><b>אודות</b></p>
+  <p>זהו כלי אישי, לא רשמי וניסיוני. הוא <b>אינו קשור</b> ל"העין השביעית", ל"המקום הכי חם בגיהנום" או ל"שקוף", אינו מאושר או ממומן על ידם, ואינו מייצג אותם. השמות, הסימנים והתכנים שייכים לבעליהם.</p>
+  <p>הדף רק מציג את האתרים הציבוריים שלהם כפי שהם, בלי לשנות, להעתיק או לאחסן תוכן. לתמיכה בעיתונות העצמאית יש להשתמש באתרים עצמם.</p>
+  <p dir="ltr"><b>About.</b> An unofficial personal prototype. It is not affiliated with, endorsed by, or sponsored by The Seventh Eye, HaMakom HaChi Cham BaGehinom, or Shakuf. All names, marks and content belong to their owners. This page only displays their public websites as they are, without copying, altering or storing any content. To support independent journalism, please use their own sites.</p>
+  <form method="dialog"><button>סגירה / Close</button></form>
+</dialog>
+<script>
+// Personal prototype. Content belongs to the respective outlets; this page only displays their public sites.
+const SITES = [
+  { name: "העין השביעית", url: "https://www.the7eye.org.il/" },
+  { name: "המקום",        url: "https://www.ha-makom.co.il/" },
+  { name: "שקוף",         url: "https://shakuf.co.il/" }
+];
+const views = document.getElementById("views"), tabs = document.getElementById("tabs");
+SITES.forEach((s, i) => {
+  const v = document.createElement("div"); v.className = "view";
+  v.innerHTML = `<div class="note">
+    <button data-r>רענון</button>
+    <a href="${s.url}" target="_blank" rel="noopener">פתיחה בדפדפן</a>
+    <button data-a>אודות</button></div>
+    <iframe title="${s.name}"></iframe>`;
+  views.appendChild(v);
+  const b = document.createElement("button"); b.textContent = s.name;
+  b.onclick = () => show(i); tabs.appendChild(b);
+  v.querySelector("[data-r]").onclick = () => { v.querySelector("iframe").src = s.url; };
+  v.querySelector("[data-a]").onclick = () => document.getElementById("about").showModal();
+});
+function show(i) {
+  [...views.children].forEach((v, j) => v.classList.toggle("on", i === j));
+  [...tabs.children].forEach((b, j) => b.classList.toggle("on", i === j));
+  const f = views.children[i].querySelector("iframe");
+  if (!f.getAttribute("src")) f.src = SITES[i].url;
+}
+show(0);
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
